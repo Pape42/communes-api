@@ -3,7 +3,7 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
-use App\Repository\RegionRepository;
+use App\Repository\DepartementRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -11,45 +11,48 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
-#[ORM\Entity(repositoryClass: RegionRepository::class)]
+#[ORM\Entity(repositoryClass: DepartementRepository::class)]
 #[ApiResource(
-    normalizationContext: ['groups' => ['region:lire']],     // groupes utilisés quand on lit
-    denormalizationContext: ['groups' => ['region:ecrire']], // groupes utilisés quand on écrit
+    normalizationContext: ['groups' => ['departement:lire']],
+    denormalizationContext: ['groups' => ['departement:ecrire']],
 )]
-#[UniqueEntity('code')] // refuse une région qui existe (erreur 422)
-class Region
+#[UniqueEntity('code')]
+class Departement
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['region:lire'])]
+    #[Groups(['departement:lire'])]
     private ?int $id = null;
 
-
-    //  la région s'affiche aussi dans un département
     #[ORM\Column(length: 3, unique: true)]
-    #[Groups(['region:lire', 'region:ecrire', 'departement:lire'])]
+    #[Groups(['departement:lire', 'departement:ecrire', 'commune:lire'])]
     #[Assert\NotBlank]
     #[Assert\Length(max: 3)]
     private ?string $code = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['region:lire', 'region:ecrire', 'departement:lire'])]
+    #[Groups(['departement:lire', 'departement:ecrire', 'commune:lire'])]
     #[Assert\NotBlank]
     #[Assert\Length(max: 255)]
     private ?string $nom = null;
 
-    // Une région a plusieurs départements (affichés en IRI)
+    #[ORM\ManyToOne(inversedBy: 'departements')]
+    #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['departement:lire', 'departement:ecrire'])]
+    #[Assert\NotNull]
+    private ?Region $region = null;
+
     /**
-     * @var Collection<int, Departement>
+     * @var Collection<int, Commune>
      */
-    #[ORM\OneToMany(targetEntity: Departement::class, mappedBy: 'region')]
-    #[Groups(['region:lire'])]
-    private Collection $departements;
+    #[ORM\OneToMany(targetEntity: Commune::class, mappedBy: 'departement')]
+    #[Groups(['departement:lire'])]
+    private Collection $communes;
 
     public function __construct()
     {
-        $this->departements = new ArrayCollection();
+        $this->communes = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -81,11 +84,23 @@ class Region
         return $this;
     }
 
-    /**
-     * @return Collection<int, Departement>
-     */
-    public function getDepartements(): Collection
+    public function getRegion(): ?Region
     {
-        return $this->departements;
+        return $this->region;
+    }
+
+    public function setRegion(?Region $region): static
+    {
+        $this->region = $region;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Commune>
+     */
+    public function getCommunes(): Collection
+    {
+        return $this->communes;
     }
 }
