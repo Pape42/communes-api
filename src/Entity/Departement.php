@@ -16,7 +16,7 @@ use Symfony\Component\Validator\Constraints as Assert;
     normalizationContext: ['groups' => ['region:lire']],     // groupes utilisés quand on lit
     denormalizationContext: ['groups' => ['region:ecrire']], // groupes utilisés quand on écrit
 )]
-#[UniqueEntity('code')] // refuse une région qui existe déjà (erreur 422)
+#[UniqueEntity('code')] // refuse une région qui existe (erreur 422)
 class Region
 {
     #[ORM\Id]
@@ -25,8 +25,8 @@ class Region
     #[Groups(['region:lire'])]
     private ?int $id = null;
 
-    // Clé naturelle : le code officiel de la région (ex. "11")
-    // departement:lire : la région s'affiche aussi dans un département
+
+    //  la région s'affiche aussi dans un département
     #[ORM\Column(length: 3, unique: true)]
     #[Groups(['region:lire', 'region:ecrire', 'departement:lire'])]
     #[Assert\NotBlank]

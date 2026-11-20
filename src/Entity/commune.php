@@ -20,12 +20,11 @@ class Commune
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['commune:lire'])] // lu, jamais écrit
+    #[Groups(['commune:lire'])] // lu jamais écrit
     private ?int $id = null;
 
-    // Clé naturelle : le code INSEE (ex. "92050")
-    // Aucun groupe : caché dans l'API, rempli seulement par l'import
-    // unique : une clé naturelle ne doit jamais être en double
+
+
     #[ORM\Column(length: 5, unique: true, nullable: true)]
     private ?string $codeInsee = null;
 
