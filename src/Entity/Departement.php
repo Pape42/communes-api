@@ -16,7 +16,7 @@ use Symfony\Component\Validator\Constraints as Assert;
     normalizationContext: ['groups' => ['departement:lire']],
     denormalizationContext: ['groups' => ['departement:ecrire']],
 )]
-#[UniqueEntity('code')] // refuse un département qui existe déjà (erreur 422)
+#[UniqueEntity('code')]
 class Departement
 {
     #[ORM\Id]
@@ -25,8 +25,6 @@ class Departement
     #[Groups(['departement:lire'])]
     private ?int $id = null;
 
-    // Clé naturelle : le code officiel du département (ex. "92", "2A", "971")
-    // commune:lire : le département s'affiche aussi dans une commune
     #[ORM\Column(length: 3, unique: true)]
     #[Groups(['departement:lire', 'departement:ecrire', 'commune:lire'])]
     #[Assert\NotBlank]
@@ -39,14 +37,12 @@ class Departement
     #[Assert\Length(max: 255)]
     private ?string $nom = null;
 
-    // Un département est dans une seule région
     #[ORM\ManyToOne(inversedBy: 'departements')]
     #[ORM\JoinColumn(nullable: false)]
     #[Groups(['departement:lire', 'departement:ecrire'])]
     #[Assert\NotNull]
     private ?Region $region = null;
 
-    // Un département a plusieurs communes (affichées en IRI)
     /**
      * @var Collection<int, Commune>
      */
